@@ -1,0 +1,42 @@
+# ===========================
+# Xcode & macOS Git Ignore
+# ===========================
+
+# Build artifacts
+build/
+DerivedData/
+
+# Xcode workspace user data
+*.xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# User-specific Xcode settings
+*.xcuserdatad/
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Xcode project settings (keep shared schemes only)
+xcuserdata/
+xcshareddata/WorkspaceSettings.xcsettings
+
+# Archives and output files
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Thumbnails
+._*
+
+# Xcode 16+ Cache (optional)
+*.xcprivacy
+*.xcodeproj/project.xcworkspace/xcuserdata/
+.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Environment or secrets
+.env
+*.key
+*.pem
+*.p12
+*.mobileprovision
