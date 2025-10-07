@@ -14,9 +14,14 @@ struct Flight: Codable, Identifiable, Equatable {
     let arrival: String
     let price: Double
 }
+
+struct Airports: Codable {
+    let airports: [Airport]
+}
+
 struct Airport: Codable, Identifiable, Equatable, Hashable {
-    let code: String
-    let name: String
+    let name, code, currency, countryCode: String
+    let restrictedOnDeparture, restrictedOnDestination: Bool
     var id: String { code }
 }
 

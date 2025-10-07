@@ -28,48 +28,47 @@ final class MockAPIClient: APIClientType {
         return f
     }()
     
-    static var baseURL: String = ""
-//    static var baseURL: String = "https://api-cert.ezycommerce.sabre.com/api/v1/Airport/OriginsWithConnections/en-us"
-    
+    private let session = URLSession.shared
+    private let baseAirportURL = "https://api-cert.ezycommerce.sabre.com/api/v1/Airport/OriginsWithConnections/en-us"
+    private let tenantHeader = "9d7d6eeb25cd6083e0df323a0fff258e59398a702fac09131275b6b1911e202d"
+
     func fetchAirports(origin: String? = nil) async throws -> [Airport] {
-        try? await Task.sleep(nanoseconds: 200_000_000)
-        let list = [
-            Airport(code: "DEL", name: "Delhi - Indira Gandhi (DEL)"),
-            Airport(code: "BOM", name: "Mumbai - Chhatrapati Shivaji (BOM)"),
-            Airport(code: "BLR", name: "Bengaluru (BLR)"),
-            Airport(code: "HYD", name: "Hyderabad (HYD)"),
-        ]
+        var urlString = baseAirportURL
         if let origin = origin {
-            switch origin {
-            case "DEL": return list.filter { $0.code != "DEL" }
-            case "BOM": return list.filter { $0.code != "BOM" }
-            default: return list
-            }
+            urlString += "?origin=\(origin)"
         }
-        return list
+
+        guard let url = URL(string: urlString) else {
+            throw NetworkError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.addValue(tenantHeader, forHTTPHeaderField: "Tenant-Identifier")
+
+        do {
+            let (data, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw NetworkError.invalidResponse
+            }
+
+            let airports = try JSONDecoder().decode(Airports.self, from: data)
+            return airports.airports
+        } catch let error as DecodingError {
+            print("Decoding error: \(error)")
+            throw NetworkError.decodingError(error)
+        } catch {
+            print("Airport fetch error: \(error)")
+            throw NetworkError.other(error)
+        }
     }
-    
-    func searchFlights(origin: String, destination: String, date: Date)
-    
-    async throws -> [Flight] {
-        
+
+    func searchFlights(origin: String, destination: String, date: Date) async throws -> [Flight] {
         try? await Task.sleep(nanoseconds: 300_000_000)
-        
         let daySeed = Calendar.current.component(.day, from: date)
-        let flights: [Flight] = [
-            Flight(flightID: "AI\(100 + (daySeed % 10))"
-                   , departure:
-                    "09:00", arrival: "11:30", price: Double(10000 + daySeed * 10)),
-            Flight(flightID: "6E\(200 + (daySeed % 15))"
-                   , departure:
-                    "14:00", arrival: "16:30", price: Double(9000 + daySeed * 8)),
-            Flight(flightID: "SG\(300 + (daySeed % 7))"
-                   , departure: "18:15",
-                   arrival: "20:45", price: Double(11000 + daySeed * 12)),
+        return [
+            Flight(flightID: "AI\(100 + daySeed % 10)", departure: "09:00", arrival: "11:30", price: 12000),
+            Flight(flightID: "6E\(200 + daySeed % 15)", departure: "14:00", arrival: "16:30", price: 9500)
         ]
-//        case: if origin == destination, return empty
-        if origin == destination { return [] }
-        return flights
     }
-    
 }
