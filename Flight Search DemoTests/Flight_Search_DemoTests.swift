@@ -14,7 +14,7 @@ final class CacheTests: XCTestCase {
         let cache = SimpleCache<String, [Flight]>(ttl: 1)
         let key = "A|B|2025-09-30"
         let flights = [Flight(flightID: "T1", departure: "09:00", arrival:
-                                "10:00", price: 1000)]
+                                "10:00", price: 1000, currency: "$")]
         cache.set(key, value: flights)
         XCTAssertEqual(cache.get(key)?.count, 1)
         
